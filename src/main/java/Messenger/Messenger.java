@@ -1,4 +1,4 @@
-package Example;
+package Messenger;
 
 public class Messenger {
     private TemplateEngine templateEngine;
@@ -10,7 +10,7 @@ public class Messenger {
     }
 
     public void sendMessage(Client client, Template template){
-        String msgContent = templateEngine.prepareMessage(templete, client);
+        String msgContent = templateEngine.prepareMessage(template, client);
         mailServer.send(client.getEmail(), msgContent);
     }
 
