@@ -2,7 +2,6 @@ package Messenger;
 
 import org.junit.jupiter.api.Test;
 
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -20,12 +19,39 @@ public class MessengerTest {
     MailServer spyMailServer = spy(MailServer.class);
     TemplateEngine spyEngine = spy(TemplateEngine.class);
 
+    @Test
+    public void test_null_client_exception() {
+        Messenger messenger = new Messenger(mockMailServer,mockEngine);
+        assertThatThrownBy(() -> messenger.sendMessage(null,mockTemplate)).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test public void verify_prepare_message() {
+        Messenger messenger = new Messenger(mockMailServer,mockEngine);
+        messenger.sendMessage(mockClient, mockTemplate);
+        verify(mockEngine).prepareMessage(any(Template.class), any(Client.class));
+    }
+
+    @Test
+    public void spy_test_send() {
+        Messenger messenger = new Messenger(spyMailServer, spyEngine);
+        when(spyEngine.prepareMessage(spyTemplate,spyClient)).thenReturn("Masz wiadomość!");
+        // spy - wywoła rzeczywistą metodę, jeśli nie została nauczona
+        // nie zdefiniowano stub'a z mailem, więc powinnien być null
+
+        messenger.sendMessage(spyClient, spyTemplate);
+
+        verify(spyEngine).prepareMessage(spyTemplate, spyClient);
+        verify(spyClient).getEmail();
+        verify(spyMailServer ).send(null,"Masz wiadomość!");
+
+    }
 
     @Test
     public void mock_test_send() {
-        Messenger messenger = new Messenger(mockMailServer,mockEngine);
+        Messenger messenger = new Messenger(mockMailServer, mockEngine);
         when(mockEngine.prepareMessage(mockTemplate, mockClient)).thenReturn("Masz wiadomość!");
         when(mockClient.getEmail()).thenReturn("client@gmail.com");
+        // mock - musi być nauczony wszystkich wykorzystywanych metod
 
         messenger.sendMessage(mockClient, mockTemplate);
 
@@ -33,30 +59,5 @@ public class MessengerTest {
         verify(mockClient).getEmail();
         verify(mockMailServer).send("client@gmail.com", "Masz wiadomość!");
     }
-
-    @Test
-    public void spy_test_send() {
-        Messenger messenger = new Messenger(spyMailServer ,spyEngine);
-        when(spyEngine.prepareMessage(spyTemplate,spyClient)).thenReturn("Masz wiadomość!");
-        when(spyClient.getEmail()).thenReturn("spy@gmail.com");
-
-        messenger.sendMessage(spyClient, spyTemplate);
-
-        verify(spyEngine).prepareMessage(spyTemplate, spyClient);
-        verify(spyClient).getEmail();
-        verify(spyMailServer ).send("spy@gmail.com","Masz wiadomość!");
-
-    }
-
-    @Test
-    public void nullClientShouldThrowsExceptionTest() {
-        Messenger messenger = new Messenger(mockMailServer,mockEngine);
-        assertThatThrownBy(() -> messenger.sendMessage(null,mockTemplate)).isInstanceOf(NullPointerException.class);
-    }
-
-
-
-
-
-
+    
 }
