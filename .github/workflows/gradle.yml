@@ -30,6 +30,6 @@ jobs:
         run: gradle build jacocoTestReport
       - name: Codecov
         uses: codecov/codecov-action@v1.0.6
-        #with:
-          #token: 
+        with:
+          token: 230067c4-6c8c-4a5c-96a0-2c1f1a8cfe00
 
