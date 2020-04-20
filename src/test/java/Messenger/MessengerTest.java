@@ -1,7 +1,9 @@
 package Messenger;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -59,5 +61,20 @@ public class MessengerTest {
         verify(mockClient).getEmail();
         verify(mockMailServer).send("client@gmail.com", "Masz wiadomość!");
     }
-    
+
+    @Test
+    public void captor_test_content(){
+        Messenger messenger = new Messenger(mockMailServer, mockEngine);
+        ArgumentCaptor<String> emailArgument = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> contentArgument = ArgumentCaptor.forClass(String.class);
+        when(mockEngine.prepareMessage(any(Template.class), any(Client.class))).thenReturn("Masz wiadomość!");
+
+        messenger.sendMessage(mockClient, mockTemplate);
+
+        verify(mockEngine).prepareMessage(any(Template.class), any(Client.class));
+        verify(mockMailServer).send(emailArgument.capture(), contentArgument.capture());
+        assertThat(contentArgument.getValue()).isEqualTo("Masz wiadomość!");
+
+    }
+
 }
